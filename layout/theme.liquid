@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }}{% if page_title %} |{% endif %} {{ shop.name }}</title>
+  <meta name="description" content="{{ page_description | escape }}">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{{ 'favicon.svg' | asset_url }}">
+  
+  <!-- Styles -->
+  {{ 'styles.css' | asset_url | stylesheet_tag }}
+  
+  <!-- Shopify Head -->
+  {{ content_for_header }}
+  
+  <!-- Google Analytics -->
+  {% if settings.google_analytics_id %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ settings.google_analytics_id }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ settings.google_analytics_id }}');
+    </script>
+  {% endif %}
+  
+  <!-- Facebook Pixel -->
+  {% if settings.facebook_pixel_id %}
+    <script>
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '{{ settings.facebook_pixel_id }}');
+      fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id={{ settings.facebook_pixel_id }}&ev=PageView&noscript=1" /></noscript>
+  {% endif %}
+</head>
+<body>
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="/" class="text-2xl font-bold">{{ shop.name }}</a>
+      <nav class="space-x-6">
+        <a href="/collections/all" class="hover:text-gray-600">Shop</a>
+        <a href="/cart" class="hover:text-gray-600">Cart</a>
+        <a href="/account" class="hover:text-gray-600">Account</a>
+      </nav>
+    </div>
+  </header>
+  
+  <!-- MistLab Store Component -->
+  <div id="mistlab-root"></div>
+  
+  <script>
+    // MistLab Shopify Store Component
+    import { useState, useEffect } from 'react';
+    import { ChevronDown, Truck, Lock, RotateCcw, Star, ShoppingCart, Check } from 'lucide-react';
+
+    /**
+     * MistLab Shopify Product Component
+     * Compatible with Shopify Liquid templates and theme settings
+     */
+    export default function MistLabStore({ product = {}, settings = {} }) {
+      const [expandedFaq, setExpandedFaq] = useState(0);
+      const [cartCount, setCartCount] = useState(0);
+      const [showNotification, setShowNotification] = useState(false);
+      const [scrollProgress, setScrollProgress] = useState(0);
+
+      // Default product data (overridable via Shopify)
+      const defaultProduct = {
+        title: 'MistLab™ Continuous Spray Bottle',
+        price: 1499, // in cents
+        originalPrice: 2999,
+        handle: 'mistlab-spray-bottle',
+        description: 'The ultra-fine mist bottle designed for hair styling, barbering, skincare, plants, and daily routines.',
+        image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop',
+        inventory: 47,
+        featured: true,
+        ...product,
+      };
+
+      const defaultSettings = {
+        primaryColor: '#000000',
+        secondaryColor: '#ffffff',
+        accentColor: '#f4f4f5',
+        showReviews: true,
+        showInventory: true,
+        ...settings,
+      };
+
+      // Track scroll progress
+      useEffect(() => {
+        const handleScroll = () => {
+          const total = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = (window.scrollY / total) * 100;
+          setScrollProgress(progress);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      const handleAddToCart = () => {
+        setCartCount((prev) => prev + 1);
+        setShowNotification(true);
+        setTimeout(() => setShowNotification(false), 2000);
+
+        // Shopify cart integration
+        if (typeof window !== 'undefined' && window.Shopify) {
+          fetch(window.Shopify.routes.root + 'cart/add.js', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              items: [
+                {
+                  id: defaultProduct.variantId || 1,
+                  quantity: 1,
+                },
+              ],
+            }),
+          });
+        }
+      };
+
+      const formatPrice = (cents) => {
+        return (cents / 100).toFixed(2);
+      };
+
+      const features = [
+        {
+          icon: '💨',
+          title: 'Continuous Fine Mist',
+          desc: 'Smooth spray technology for even distribution with every press.',
+        },
+        {
+          icon: '🎯',
+          title: 'Multi-Use Design',
+          desc: 'Perfect for barbers, skincare, cleaning, plants, and hair styling.',
+        },
+        {
+          icon: '✨',
+          title: 'Modern Aesthetic',
+          desc: 'Minimal matte design that looks premium anywhere.',
+        },
+      ];
+
+      const reviews = [
+        {
+          name: 'Jordan M.',
+          role: 'Hair Stylist',
+          review: 'Looks way more premium than expected. The mist is insanely smooth.',
+          rating: 5,
+        },
+        {
+          name: 'Ali R.',
+          role: 'Barber',
+          review: 'Perfect for my barber setup. Clients always ask where I got it.',
+          rating: 5,
+        },
+        {
+          name: 'Chris T.',
+          role: 'Salon Owner',
+          review: 'Actually works better than expensive salon bottles.',
+          rating: 5,
+        },
+      ];
+
+      const faqs = [
+        {
+          q: 'How does the continuous mist work?',
+          a: 'The bottle uses pressure technology to create a smooth continuous spray with a single squeeze. Simply fill, prime, and enjoy uninterrupted misting.',
+        },
+        {
+          q: 'Can I use it for plants and skincare?',
+          a: 'Yes. It works perfectly for hair, plants, cleaning solutions, and facial misting. The ultra-fine mist is gentle enough for sensitive skin.',
+        },
+        {
+          q: 'Is it refillable?',
+          a: 'Absolutely. Just unscrew the top and refill anytime. Each bottle holds up to 500ml and is made from durable, BPA-free materials.',
+        },
+        {
+          q: 'What is the warranty?',
+          a: 'All MistLab bottles come with a 2-year manufacturer warranty covering defects in materials and workmanship.',
+        },
+        {
+          q: 'How long does shipping take?',
+          a: 'Standard shipping takes 3-5 business days. Express shipping (1-2 days) is available at checkout.',
+        },
+      ];
+
+      const discountPercent = Math.round(
+        ((defaultProduct.originalPrice - defaultProduct.price) / defaultProduct.originalPrice) * 100
+      );
+
+      return (
+        <div className="bg-white text-black min-h-screen font-sans">
+          {/* Progress Bar */}
+          <div
+            className="fixed top-0 left-0 h-1 z-50 transition-all duration-300"
+            style={{
+              width: `${scrollProgress}%`,
+              backgroundColor: defaultSettings.primaryColor,
+            }}
+          />
+
+          {/* Cart Notification */}
+          {showNotification && (
+            <div className="fixed top-20 right-6 z-40 animate-in fade-in slide-in-from-top">
+              <div
+                className="text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2"
+                style={{ backgroundColor: defaultSettings.primaryColor }}
+              >
+                <Check size={20} />
+                Added to cart! ({cartCount} items)
+              </div>
+            </div>
+          )}
+
+          {/* HERO */}
+          <section
+            className="relative overflow-hidden px-6 py-20 md:px-16"
+            style={{ backgroundColor: defaultSettings.secondaryColor }}
+          >
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-100 rounded-full blur-3xl opacity-30" />
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-100 rounded-full blur-3xl opacity-30" />
+            </div>
+
+            <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+              {/* Left Content */}
+              <div className="animate-in fade-in slide-in-from-left duration-1000">
+                <div
+                  className="inline-block px-4 py-1 rounded-full text-white text-sm mb-6 font-semibold"
+                  style={{ backgroundColor: defaultSettings.primaryColor }}
+                >
+                  🔥 VIRAL TIKTOK FAVORITE
+                </div>
+
+                <h1
+                  className="text-5xl md:text-7xl font-black leading-tight mb-6"
+                  style={{ color: defaultSettings.primaryColor }}
+                >
+                  {defaultProduct.title}
+                </h1>
+
+                <p className="text-lg text-zinc-600 mb-8 max-w-lg leading-relaxed">
+                  {defaultProduct.description}
+                </p>
+
+                {/* Pricing */}
+                <div className="flex gap-4 items-center mb-8 flex-wrap">
+                  <div className="text-5xl font-black" style={{ color: defaultSettings.primaryColor }}>
+                    £{formatPrice(defaultProduct.price)}
+                  </div>
+                  <div className="text-zinc-400 line-through text-2xl">
+                    £{formatPrice(defaultProduct.originalPrice)}
+                  </div>
+                  <div
+                    className="text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg"
+                    style={{ backgroundColor: defaultSettings.primaryColor }}
+                  >
+                    🎉 {discountPercent}% OFF
+                  </div>
+                </div>
+
+                {/* Trust Badges */}
+                <div className="mb-8 flex gap-6 flex-wrap text-sm text-zinc-600">
+                  <div className="flex items-center gap-2">
+                    <Truck size={20} style={{ color: defaultSettings.primaryColor }} /> Fast Shipping
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Lock size={20} style={{ color: defaultSettings.primaryColor }} /> Leak-Proof
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RotateCcw size={20} style={{ color: defaultSettings.primaryColor }} /> Refillable
+                  </div>
+                </div>
+
+                {/* CTA Buttons */}
+                <div className="flex gap-4 flex-wrap">
+                  <a
+                    href={`/products/${defaultProduct.handle}`}
+                    className="text-white px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-200 shadow-lg hover:shadow-xl inline-block"
+                    style={{ backgroundColor: defaultSettings.primaryColor }}
+                  >
+                    Buy Now
+                  </a>
+
+                  <button
+                    onClick={handleAddToCart}
+                    className="border-2 px-8 py-4 rounded-2xl text-lg font-bold transition-all duration-200 flex items-center gap-2"
+                    style={{
+                      borderColor: defaultSettings.primaryColor,
+                      color: defaultSettings.primaryColor,
+                    }}
+                  >
+                    <ShoppingCart size={20} />
+                    Add To Cart
+                  </button>
+                </div>
+
+                {/* Social Proof */}
+                {defaultSettings.showReviews && (
+                  <div className="mt-12 pt-8 border-t border-zinc-200">
+                    <p className="text-sm text-zinc-600 mb-3">⭐ Trusted by 10,000+ customers</p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex -space-x-2">
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 border-2 border-white"
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-semibold">4.8/5 from 2,340 reviews</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Image */}
+              <div className="relative animate-in fade-in slide-in-from-right duration-1000">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-purple-200 to-pink-200 blur-3xl opacity-50 rounded-full animate-pulse" />
+                <div className="relative bg-white p-4 rounded-3xl shadow-2xl">
+                  <img
+                    src={defaultProduct.image}
+                    alt={defaultProduct.title}
+                    className="rounded-2xl w-full object-cover h-[500px] md:h-[600px]"
+                  />
+                  {defaultSettings.showInventory && defaultProduct.inventory > 0 && (
+                    <div className="absolute top-6 right-6 bg-white px-4 py-2 rounded-full shadow-lg text-sm font-bold">
+                      ⚡ In Stock ({defaultProduct.inventory} left)
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* FEATURES */}
+          <section
+            className="px-6 md:px-16 py-24 text-white"
+            style={{ backgroundColor: defaultSettings.primaryColor }}
+          >
+            <div className="max-w-7xl mx-auto text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-black mb-4">Why Everyone Loves It</h2>
+              <p className="text-gray-300 max-w-2xl mx-auto text-lg">
+                Minimal design meets salon-grade performance.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              {features.map((item, index) => (
+                <div key={index} className="bg-zinc-900 p-8 rounded-3xl border border-zinc-700 hover:border-white transition-all duration-300 group hover:shadow-2xl hover:shadow-white/10">
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</div>
+                  <div className="text-2xl font-bold mb-4">{item.title}</div>
+                  <p className="text-gray-300 leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* SOCIAL PROOF */}
+          {defaultSettings.showReviews && (
+            <section className="px-6 md:px-16 py-24 bg-white">
+              <div className="max-w-7xl mx-auto text-center mb-16">
+                <h2 className="text-4xl md:text-5xl font-black mb-4">Trusted By Thousands</h2>
+                <p className="text-zinc-600 text-lg">
+                  Real customers, real results. Rated 4.8/5 by customers worldwide.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+                {reviews.map((review, index) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-br from-white to-zinc-50 p-8 rounded-3xl shadow-lg border border-zinc-200 hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                  >
+                    <div className="flex gap-1 text-yellow-400 text-xl mb-4">
+                      {[...Array(review.rating)].map((_, i) => (
+                        <Star key={i} size={20} fill="currentColor" />
+                      ))}
+                    </div>
+                    <p className="text-zinc-700 mb-6 leading-relaxed italic">"{review.review}"</p>
+                    <div className="font-bold text-black">{review.name}</div>
+                    <div className="text-sm text-zinc-500">{review.role}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* FAQ */}
+          <section className="px-6 md:px-16 py-24 bg-gradient-to-b from-zinc-50 to-white">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-4xl md:text-5xl font-black mb-12 text-center">
+                Frequently Asked Questions
+              </h2>
+
+              <div className="space-y-4">
+                {faqs.map((faq, index) => (
+                  <div
+                    key={index}
+                    className="border-2 border-zinc-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-black"
+                  >
+                    <button
+                      onClick={() => setExpandedFaq(expandedFaq === index ? -1 : index)}
+                      className="w-full px-6 py-5 text-left font-bold text-lg flex justify-between items-center hover:bg-zinc-50 transition-colors"
+                    >
+                      <span>{faq.q}</span>
+                      <ChevronDown
+                        size={24}
+                        className={`transition-transform duration-300 ${
+                          expandedFaq === index ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {expandedFaq === index && (
+                      <div className="px-6 py-4 bg-zinc-50 border-t-2 border-zinc-200 animate-in fade-in slide-in-from-top-2">
+                        <p className="text-zinc-700 leading-relaxed">{faq.a}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* FINAL CTA */}
+          <section
+            className="px-6 md:px-16 py-24 text-white text-center relative overflow-hidden"
+            style={{ backgroundColor: defaultSettings.primaryColor }}
+          >
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent)]" />
+            </div>
+
+            <div className="relative max-w-4xl mx-auto">
+              <h2 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
+                Upgrade Your Routine Today
+              </h2>
+
+              <p className="text-gray-300 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+                Join thousands of satisfied customers. Get the viral continuous mist bottle before today's sale ends.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href={`/products/${defaultProduct.handle}`}
+                  className="bg-white text-black px-10 py-5 rounded-2xl text-xl font-bold hover:scale-105 active:scale-95 transition-all duration-200 shadow-2xl inline-block"
+                >
+                  Shop Now
+                </a>
+
+                <a
+                  href="/collections/all"
+                  className="border-2 border-white text-white px-10 py-5 rounded-2xl text-xl font-bold hover:bg-white hover:text-black transition-all duration-200 inline-block"
+                >
+                  Learn More
+                </a>
+              </div>
+
+              {/* Urgency Indicator */}
+              <p className="mt-10 text-yellow-300 font-semibold text-sm">
+                ⏰ Sale ends in 2 days • {defaultProduct.inventory} units left in stock
+              </p>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer
+            className="px-6 md:px-16 py-12 text-white text-center text-sm text-gray-300 border-t"
+            style={{ backgroundColor: defaultSettings.primaryColor }}
+          >
+            <p>
+              © 2026 MistLab™ | All rights reserved |{' '}
+              <a href="/policies/privacy-policy" className="hover:text-white">
+                Privacy Policy
+              </a>{' '}
+              •{' '}
+              <a href="/policies/terms-of-service" className="hover:text-white">
+                Terms
+              </a>
+            </p>
+          </footer>
+        </div>
+      );
+    }
+  </script>
+  
+  <!-- Main Content -->
+  <main>
+    {{ content_for_layout }}
+  </main>
+  
+  <!-- Scripts -->
+  {{ 'main.js' | asset_url | script_tag }}
+</body>
+</html>
