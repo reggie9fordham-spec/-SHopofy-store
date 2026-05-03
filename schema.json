@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Shopify Theme Settings",
+  "properties": {
+    "color_schemes": {
+      "type": "object",
+      "title": "Color Schemes",
+      "properties": {
+        "primary": {
+          "type": "object",
+          "title": "Primary Colors",
+          "properties": {
+            "background": {
+              "type": "string",
+              "title": "Background Color",
+              "default": "#ffffff"
+            },
+            "text": {
+              "type": "string",
+              "title": "Text Color",
+              "default": "#000000"
+            },
+            "accent": {
+              "type": "string",
+              "title": "Accent Color",
+              "default": "#000000"
+            }
+          }
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "title": "Typography Settings",
+      "properties": {
+        "heading_size": {
+          "type": "integer",
+          "title": "Heading Size",
+          "default": 48,
+          "minimum": 24,
+          "maximum": 96
+        },
+        "body_size": {
+          "type": "integer",
+          "title": "Body Text Size",
+          "default": 16,
+          "minimum": 12,
+          "maximum": 24
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "title": "Product Settings",
+      "properties": {
+        "featured_collection": {
+          "type": "string",
+          "title": "Featured Collection Handle",
+          "default": "featured-products"
+        },
+        "reviews_enabled": {
+          "type": "boolean",
+          "title": "Enable Product Reviews",
+          "default": true
+        },
+        "show_inventory": {
+          "type": "boolean",
+          "title": "Show Inventory Count",
+          "default": true
+        }
+      }
+    },
+    "checkout": {
+      "type": "object",
+      "title": "Checkout Settings",
+      "properties": {
+        "show_payment_methods": {
+          "type": "boolean",
+          "title": "Show Payment Methods",
+          "default": true
+        },
+        "enable_guest_checkout": {
+          "type": "boolean",
+          "title": "Allow Guest Checkout",
+          "default": true
+        }
+      }
+    }
+  }
+}
