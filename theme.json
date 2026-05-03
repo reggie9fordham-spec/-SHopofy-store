@@ -1,0 +1,94 @@
+{
+  "name": "MistLab Premium Store",
+  "description": "A high-converting e-commerce theme optimized for product sales",
+  "version": "1.0.0",
+  "author": "Shopify Theme Developer",
+  "settings": {
+    "color_schemes": {
+      "type": "object",
+      "default": {
+        "background": "#ffffff",
+        "text": "#000000",
+        "accent": "#000000",
+        "secondary": "#f4f4f5"
+      }
+    },
+    "product": {
+      "type": "object",
+      "properties": {
+        "show_reviews": {
+          "type": "boolean",
+          "default": true
+        },
+        "show_inventory": {
+          "type": "boolean",
+          "default": true
+        },
+        "enable_quick_shop": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "lazy_load_images": {
+          "type": "boolean",
+          "default": true
+        },
+        "minify_css": {
+          "type": "boolean",
+          "default": true
+        },
+        "minify_js": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "marketing": {
+      "type": "object",
+      "properties": {
+        "show_newsletter_signup": {
+          "type": "boolean",
+          "default": true
+        },
+        "show_social_links": {
+          "type": "boolean",
+          "default": true
+        },
+        "facebook_pixel_id": {
+          "type": "string",
+          "default": ""
+        },
+        "google_analytics_id": {
+          "type": "string",
+          "default": ""
+        }
+      }
+    }
+  },
+  "sections": [
+    "hero",
+    "features",
+    "reviews",
+    "faq",
+    "cta"
+  ],
+  "templates": [
+    "index",
+    "product",
+    "collection",
+    "cart",
+    "checkout",
+    "404",
+    "page"
+  ],
+  "integrations": [
+    "facebook",
+    "google_analytics",
+    "klaviyo",
+    "shopify_pay"
+  ]
+}
